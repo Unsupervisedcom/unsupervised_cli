@@ -108,6 +108,38 @@ ensure_in_path() {
   fi
 }
 
+ensure_claude_code() {
+  if command -v claude >/dev/null 2>&1; then
+    log "Claude Code is already installed ($(claude --version 2>/dev/null || echo 'unknown version'))."
+    return
+  fi
+
+  log ""
+  log "Claude Code is not installed — installing via the official installer..."
+  if ! curl -fsSL https://claude.ai/install.sh | bash; then
+    warn "Claude Code installation failed. Install it manually: https://docs.anthropic.com/en/docs/claude-code/setup"
+    warn "Unsupervised CLI was installed successfully but requires Claude Code to run."
+    return
+  fi
+  log "Claude Code installed successfully."
+}
+
+ensure_uvx() {
+  if command -v uvx >/dev/null 2>&1; then
+    log "uvx is already installed ($(uvx --version 2>/dev/null || echo 'unknown version'))."
+    return
+  fi
+
+  log ""
+  log "uvx is not installed — installing uv via the official installer..."
+  if ! curl -LsSf https://astral.sh/uv/install.sh | sh; then
+    warn "uv installation failed. Install it manually: https://docs.astral.sh/uv/getting-started/installation/"
+    warn "Unsupervised CLI was installed successfully but requires uvx to run."
+    return
+  fi
+  log "uv (includes uvx) installed successfully."
+}
+
 # --- main -------------------------------------------------------------------
 
 main() {
@@ -149,6 +181,10 @@ main() {
 
   # Ensure INSTALL_DIR is in PATH for future sessions
   ensure_in_path
+
+  # Claude Code and uvx are required to run Unsupervised — install if missing
+  ensure_claude_code
+  ensure_uvx
 
   log ""
   log "Run 'unsupervised --help' to get started."
